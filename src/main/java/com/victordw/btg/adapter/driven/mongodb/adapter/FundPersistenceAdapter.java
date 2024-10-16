@@ -2,6 +2,7 @@ package com.victordw.btg.adapter.driven.mongodb.adapter;
 
 import com.victordw.btg.domain.model.InvestmentFund;
 import com.victordw.btg.domain.spi.IFundPersistenPort;
+import com.victordw.btg.domain.util.OrderData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -19,12 +20,12 @@ public class FundPersistenceAdapter implements IFundPersistenPort {
 	private final MongoTemplate mongoTemplate;
 
 	@Override
-	public List<InvestmentFund> getAllFund(BigDecimal maxAmount, String category, String orderBy) {
+	public List<InvestmentFund> getAllFund(BigDecimal maxAmount, String category, OrderData orderData) {
 
 		Query query = new Query();
-		Sort.Direction direction = Sort.Direction.valueOf(orderBy);
+		Sort.Direction direction = Sort.Direction.valueOf(orderData.direction());
 
-		Sort sort = Sort.by(direction, "name");
+		Sort sort = Sort.by(direction, orderData.orderBy());
 		query = this.filterByMaxAmountOrCategory(query, maxAmount, category);
 		query.with(sort);
 
