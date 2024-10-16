@@ -1,5 +1,7 @@
 package com.victordw.btg.adapter.driven.mongodb.adapter;
 
+import com.victordw.btg.adapter.driven.mongodb.document.InvestmentFundDoc;
+import com.victordw.btg.adapter.driven.mongodb.mapper.IFundMapper;
 import com.victordw.btg.domain.model.InvestmentFund;
 import com.victordw.btg.domain.spi.IFundPersistenPort;
 import com.victordw.btg.domain.util.OrderData;
@@ -17,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FundPersistenceAdapter implements IFundPersistenPort {
 
+	private final IFundMapper fundMapper;
 	private final MongoTemplate mongoTemplate;
 
 	@Override
@@ -29,7 +32,11 @@ public class FundPersistenceAdapter implements IFundPersistenPort {
 		query = this.filterByMaxAmountOrCategory(query, maxAmount, category);
 		query.with(sort);
 
-		return mongoTemplate.find(query, InvestmentFund.class);
+		List<InvestmentFundDoc> fundDocList = mongoTemplate.find(query, InvestmentFundDoc.class);
+
+		return fundDocList.stream()
+				.map(fundMapper::toModel)
+				.toList();
 	}
 
 	private Query filterByMaxAmountOrCategory(Query query, BigDecimal maxAmount, String category) {

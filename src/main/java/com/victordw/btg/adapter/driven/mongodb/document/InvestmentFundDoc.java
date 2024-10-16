@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class InvestmentFund {
+public class InvestmentFundDoc {
 
 	@Id
 	private String id;
