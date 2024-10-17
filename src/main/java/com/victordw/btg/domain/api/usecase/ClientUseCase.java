@@ -1,7 +1,8 @@
 package com.victordw.btg.domain.api.usecase;
 
-import com.victordw.btg.domain.api.IClientServicePort;
+import com.victordw.btg.domain.api.ISubscriptionServicePort;
 import com.victordw.btg.domain.api.IFundServiceBasic;
+import com.victordw.btg.domain.api.ITransactionService;
 import com.victordw.btg.domain.exception.FundAlreadyExistsException;
 import com.victordw.btg.domain.exception.InvestmentAmountException;
 import com.victordw.btg.domain.exception.NotFoundException;
@@ -16,10 +17,11 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class ClientUseCase implements IClientServicePort {
+public class ClientUseCase implements ISubscriptionServicePort {
 
 	private final IClientPersistencePort clientPersistencePort;
 	private final IFundServiceBasic fundService;
+	private final ITransactionService transactionService;
 
 	@Override
 	public void addSubscription(String clientId, FundSubscribed fundSubscribed) {
@@ -43,6 +45,12 @@ public class ClientUseCase implements IClientServicePort {
 		client.getFundsSubscribed().add(fundSubscribed);
 		this.deductInvestmentFromAvailableBalance(client, fundSubscribed.investmentAmount());
 		clientPersistencePort.saveClient(client);
+		this.transactionService.registerTransaction(
+				client.getId(),
+				fund.getName(),
+				fundSubscribed.investmentAmount(),
+				ConstantDomain.TYPE_OPENING
+		);
 	}
 
 	private void validateAmountToInvestedAndAvailableBalance(

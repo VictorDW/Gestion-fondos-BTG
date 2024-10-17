@@ -8,22 +8,22 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Document(collection = "transactions")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Transaction {
+public class TransactionDoc {
 
 	@Id
 	private String id;
 
-	@Field("email_client")
-	private String email;
+	@Field("client_id")
+	private String clientId;
 
-	@Field("fund_id")
-	private Long fundId;
+	@Field("name_fund")
+	private String nameFund;
 
 	@Field("type")
 	private String type;
@@ -32,5 +32,5 @@ public class Transaction {
 	private BigDecimal mount;
 
 	@Field("date_registration")
-	private LocalDate dateRegistration;
+	private LocalDateTime dateRegistration;
 }
