@@ -15,7 +15,7 @@ public final class OrderUtil {
 				Direction.ASC;
 
 		return new OrderData(
-				temporaryDirection.toString().toLowerCase(),
+				temporaryDirection.toString(),
 				DEFAULT_ORDER_BY
 		);
 	}
