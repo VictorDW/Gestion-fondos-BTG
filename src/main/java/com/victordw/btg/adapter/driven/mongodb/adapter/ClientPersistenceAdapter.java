@@ -8,6 +8,8 @@ import com.victordw.btg.domain.spi.IClientPersistencePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class ClientPersistenceAdapter implements IClientPersistencePort {
@@ -16,9 +18,8 @@ public class ClientPersistenceAdapter implements IClientPersistencePort {
 	private final IClientMapper clientMapper;
 
 	@Override
-	public Client getClient(String dni) {
-		ClientDoc clientDoc = clientRepository.findByDni(dni);
-		return clientMapper.toModel(clientDoc);
+	public Optional<Client> getClient(String clientId) {
+	 return clientRepository.findById(clientId).map(clientMapper::toModel);
 	}
 
 	@Override
