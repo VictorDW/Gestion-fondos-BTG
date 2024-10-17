@@ -1,7 +1,7 @@
 package com.victordw.btg.domain.api.usecase;
 
 import com.victordw.btg.domain.model.InvestmentFund;
-import com.victordw.btg.domain.spi.IFundPersistenPort;
+import com.victordw.btg.domain.spi.IFundPersistencePort;
 import com.victordw.btg.domain.util.OrderData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ class FundUseCaseTest {
 	private FundUseCase fundUseCase;
 
 	@Mock
-	private IFundPersistenPort fundPersistenPort;
+	private IFundPersistencePort fundPersistenPort;
 
 	@Test
 	@DisplayName("Get All Fund with Ascending Order")

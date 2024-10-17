@@ -6,5 +6,20 @@ public class ConstantDomain {
 		throw new IllegalArgumentException("This is a utility class and cannot be instantiated");
 	}
 
-	public static final String NOT_FOUND_MESSAGE = "El cliente con id %s no existe";
+	public enum Utils {
+		CLIENT("cliente"),
+		FUND("fondo");
+
+
+		private final String util;
+
+		Utils(String util) {
+			this.util = util;
+		}
+
+		public String get() {
+			return util;
+		}
+	}
+	public static final String NOT_FOUND_MESSAGE = "El %s con id %s no existe";
 }
