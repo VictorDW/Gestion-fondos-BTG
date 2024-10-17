@@ -1,7 +1,9 @@
 package com.victordw.btg.domain.api.usecase;
 
+import com.victordw.btg.domain.exception.NotFoundException;
 import com.victordw.btg.domain.model.InvestmentFund;
 import com.victordw.btg.domain.spi.IFundPersistencePort;
+import com.victordw.btg.domain.util.ConstantDomain;
 import com.victordw.btg.domain.util.OrderData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -24,7 +29,7 @@ class FundUseCaseTest {
 	private FundUseCase fundUseCase;
 
 	@Mock
-	private IFundPersistencePort fundPersistenPort;
+	private IFundPersistencePort fundPersistencePort;
 
 	@Test
 	@DisplayName("Get All Fund with Ascending Order")
@@ -37,7 +42,7 @@ class FundUseCaseTest {
 		InvestmentFund fund2 = InvestmentFund.builder().id(2L).name("FDO-ACCIONES").build();
 		List<InvestmentFund> expectedFunds = List.of(fund1, fund2);
 
-		given(fundPersistenPort.getAllFund(null, null, expectedOrderData))
+		given(fundPersistencePort.getAllFund(null, null, expectedOrderData))
 				.willReturn(expectedFunds);
 
 		// WHEN
@@ -45,7 +50,7 @@ class FundUseCaseTest {
 
 		// THAT
 		assertEquals(expectedFunds, result);
-		verify(fundPersistenPort).getAllFund(null, null, expectedOrderData);
+		verify(fundPersistencePort).getAllFund(null, null, expectedOrderData);
 	}
 
 	@Test
@@ -59,7 +64,7 @@ class FundUseCaseTest {
 		InvestmentFund fund2 = InvestmentFund.builder().id(2L).name("FDO-ACCIONES").build();
 		List<InvestmentFund> expectedFunds = List.of(fund2, fund1);
 
-		given(fundPersistenPort.getAllFund(null, null, expectedOrderData))
+		given(fundPersistencePort.getAllFund(null, null, expectedOrderData))
 				.willReturn(expectedFunds);
 
 		// WHEN
@@ -67,7 +72,7 @@ class FundUseCaseTest {
 
 		// THAT
 		assertEquals(expectedFunds, result);
-		verify(fundPersistenPort).getAllFund(null, null, expectedOrderData);
+		verify(fundPersistencePort).getAllFund(null, null, expectedOrderData);
 	}
 
 	@Test
@@ -84,7 +89,7 @@ class FundUseCaseTest {
 		InvestmentFund fund2 = InvestmentFund.builder().id(2L).name("FDO-ACCIONES").build();
 		List<InvestmentFund> expectedFunds = List.of(fund1, fund2);
 
-		given(fundPersistenPort.getAllFund(maxAmount, category, expectedOrderData))
+		given(fundPersistencePort.getAllFund(maxAmount, category, expectedOrderData))
 				.willReturn(expectedFunds);
 
 		// WHEN
@@ -92,6 +97,47 @@ class FundUseCaseTest {
 
 		// THAT
 		assertEquals(expectedFunds, result);
-		verify(fundPersistenPort).getAllFund(maxAmount, category, expectedOrderData);
+		verify(fundPersistencePort).getAllFund(maxAmount, category, expectedOrderData);
 	}
+
+	@Test
+	@DisplayName("must return the investment fund")
+	void test4() {
+
+		// GIVEN
+		Long fundId = 1L;
+		InvestmentFund fund = InvestmentFund.builder()
+				.id(1L)
+				.name("FPV_BTG_PACTUAL_RECAUDADORA")
+				.minimumAmount(new BigDecimal("75000"))
+				.category("FVP")
+				.build();
+
+		given(fundPersistencePort.getFundById(fundId)).willReturn(Optional.of(fund));
+
+		// WHEN
+		InvestmentFund resul = fundUseCase.getFundById(fundId);
+
+		// THAT
+		assertThat(fund.getId()).isEqualTo(resul.getId());
+	}
+
+	@Test
+	@DisplayName("should throw an exception when the investment fund does not exist")
+	void test5() {
+		// GIVEN
+		Long fundId = 1L;
+
+		given(fundPersistencePort.getFundById(fundId)).willReturn(Optional.empty());
+
+		// WHEN
+		NotFoundException exception = assertThrows(NotFoundException.class,
+				() -> fundUseCase.getFundById(fundId)
+		);
+
+		//THAT
+		assertEquals(String.format(
+				ConstantDomain.NOT_FOUND_MESSAGE, ConstantDomain.Utils.FUND.get(), fundId), exception.getMessage());
+	}
+
 }
