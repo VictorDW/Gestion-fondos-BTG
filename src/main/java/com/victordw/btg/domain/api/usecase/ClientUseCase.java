@@ -2,6 +2,7 @@ package com.victordw.btg.domain.api.usecase;
 
 import com.victordw.btg.domain.api.IClientServicePort;
 import com.victordw.btg.domain.api.IFundServiceBasic;
+import com.victordw.btg.domain.exception.InvestmentAmountException;
 import com.victordw.btg.domain.exception.NotFoundException;
 import com.victordw.btg.domain.model.Client;
 import com.victordw.btg.domain.model.FundSubscribed;
@@ -9,6 +10,8 @@ import com.victordw.btg.domain.model.InvestmentFund;
 import com.victordw.btg.domain.spi.IClientPersistencePort;
 import com.victordw.btg.domain.util.ConstantDomain;
 import lombok.RequiredArgsConstructor;
+
+import java.math.BigDecimal;
 
 @RequiredArgsConstructor
 public class ClientUseCase implements IClientServicePort {
@@ -29,10 +32,28 @@ public class ClientUseCase implements IClientServicePort {
 
 		InvestmentFund fund = fundService.getFundById(fundSubscribed.fundId());
 
-		System.out.println(fund);
+		this.validateAmountToInvestedAndInitialBalance(fundSubscribed.investmentAmount(), fund, client.getAvailableBalance());
+
 		client.getFundsSubscribed().add(fundSubscribed);
 		clientPersistencePort.saveClient(client);
 
+	}
+
+	private void validateAmountToInvestedAndInitialBalance(
+			BigDecimal amountToInvest,
+			InvestmentFund investmentFund,
+			BigDecimal availableBalance
+	) {
+		if (amountToInvest.compareTo(investmentFund.getMinimumAmount()) < ConstantDomain.NUMBER_ZERO) {
+			this.investmentAmountException(ConstantDomain.AMOUNT_TO_INVEST_IS_NOT_VALID, investmentFund.getName());
+		}
+		if (amountToInvest.compareTo(availableBalance) > ConstantDomain.NUMBER_ZERO) {
+				this.investmentAmountException(ConstantDomain.INSUFFICIENT_BALANCE, investmentFund.getName());
+		}
+	}
+
+	private void investmentAmountException(String message, String fund) {
+		throw new InvestmentAmountException(String.format(message, fund));
 	}
 
 }
