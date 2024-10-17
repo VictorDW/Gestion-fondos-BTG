@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 @Getter
 public class Client {
-
+	private final String id;
 	private final String name;
 	private final String email;
 	private final String cellPhone;
