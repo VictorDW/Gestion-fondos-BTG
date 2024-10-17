@@ -9,12 +9,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Document(collection = "client")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class Client {
+public class ClientDoc {
 
 	@Id
 	private String id;
@@ -35,7 +36,7 @@ public class Client {
 	private BigDecimal availableBalance;
 
 	@Field("funds_subscribed")
-	private String fundsSubscribed;
+	private List<FundSubscribedDoc> fundsSubscribed;
 
 	@Field("notification_preference")
 	private String notificationPreference;
