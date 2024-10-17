@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 public class InvestmentFundDoc {
 
 	@Id
-	private String id;
+	private Long id;
 
 	@Field("name")
 	private String name;
