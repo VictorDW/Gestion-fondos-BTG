@@ -1,6 +1,7 @@
 package com.victordw.btg.domain.api.usecase;
 
 import com.victordw.btg.domain.api.IFundServiceBasic;
+import com.victordw.btg.domain.api.ITransactionService;
 import com.victordw.btg.domain.exception.FundAlreadyExistsException;
 import com.victordw.btg.domain.exception.InvestmentAmountException;
 import com.victordw.btg.domain.exception.NotFoundException;
@@ -36,6 +37,9 @@ class ClientUseCaseTest {
 	@Mock
 	private IFundServiceBasic fundService;
 
+	@Mock
+	private ITransactionService transactionService;
+
 	@InjectMocks
 	private ClientUseCase clientUseCase;
 
@@ -69,6 +73,12 @@ class ClientUseCaseTest {
 		assertEquals(deductAmount, client.getAvailableBalance());
 		assertTrue(client.getFundsSubscribed().contains(fundSubscribed));
 		verify(clientPersistencePort).saveClient(client);
+		verify(transactionService).registerTransaction(
+				clientId,
+				fund.getName(),
+				fundSubscribed.investmentAmount(),
+				ConstantDomain.TYPE_OPENING
+		);
 	}
 
 	@Test

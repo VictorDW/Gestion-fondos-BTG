@@ -14,15 +14,15 @@ public class TransactionUseCase implements ITransactionService {
 	private final ITransactionPersistencePort transactionPersistencePort;
 
 	@Override
-	public void registerTransaction(String clientId, String fundId, BigDecimal amount, String type) {
-		Transaction transaction = createTransaction(clientId, fundId, amount, type);
+	public void registerTransaction(String clientId, String nameFund, BigDecimal amount, String type) {
+		Transaction transaction = createTransaction(clientId, nameFund, amount, type);
 		transactionPersistencePort.saveTransaction(transaction);
 	}
 
-	private Transaction createTransaction(String clientId, String fundId, BigDecimal amount, String type) {
+	private Transaction createTransaction(String clientId, String nameFund, BigDecimal amount, String type) {
 		return Transaction.builder()
 				.clientId(clientId)
-				.nameFund(fundId)
+				.nameFund(nameFund)
 				.type(type)
 				.mount(amount)
 				.dateRegistration(LocalDateTime.now())
