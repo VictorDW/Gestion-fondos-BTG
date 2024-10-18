@@ -29,6 +29,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	implementation ("com.twilio.sdk:twilio:10.4.1") {
+		exclude group: 'commons-logging', module: 'commons-logging'
+	}
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
