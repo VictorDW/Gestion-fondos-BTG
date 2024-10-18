@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface IFundSubscribeMapperRequest {
+public interface IClientMapperRequest {
 
 	@Mapping(target = "name", ignore = true)
 	FundSubscribed toModel(FundSubscribedRequest request);

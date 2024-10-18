@@ -147,8 +147,8 @@ public class ClientUseCase implements IClientServicePort {
 		notificationPort.sendNotification(client.getEmail(), ConstantDomain.SUBJECT, message);
 	}
 
-	/*@Override
+	@Override
 	public List<FundSubscribed> listAssociatedFunds(String clientId) {
 		return this.getClient(clientId).getFundsSubscribed();
-	}*/
+	}
 }

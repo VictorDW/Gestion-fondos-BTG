@@ -2,27 +2,33 @@ package com.victordw.btg.adapter.driving.http.controller;
 
 import com.victordw.btg.adapter.driving.http.dto.request.FundCancellationRequest;
 import com.victordw.btg.adapter.driving.http.dto.request.FundSubscribedRequest;
-import com.victordw.btg.adapter.driving.http.mapper.request.IFundSubscribeMapperRequest;
+import com.victordw.btg.adapter.driving.http.dto.response.FundSubscribedResponse;
+import com.victordw.btg.adapter.driving.http.mapper.request.IClientMapperRequest;
+import com.victordw.btg.adapter.driving.http.mapper.response.IClientMapperResponse;
 import com.victordw.btg.domain.api.IClientServicePort;
 import com.victordw.btg.domain.model.FundSubscribed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/client")
 @RequiredArgsConstructor
 public class ClientController {
 
-	private final IFundSubscribeMapperRequest fundSubscribeMapperRequest;
+	private final IClientMapperRequest clientMapperRequest;
+	private final IClientMapperResponse clientMapperResponse;
 	private final IClientServicePort clientServicePort;
+	private final IClientServicePort clientServicesPort;
 
 	@PostMapping("/{id}/subscription")
 	ResponseEntity<Void> subscribeFund(
 			@PathVariable("id") String clientId,
 			@RequestBody FundSubscribedRequest request
 	) {
-		FundSubscribed fundSubscribed = fundSubscribeMapperRequest.toModel(request);
+		FundSubscribed fundSubscribed = clientMapperRequest.toModel(request);
 		clientServicePort.addSubscription(clientId, fundSubscribed);
 		return ResponseEntity.ok().build();
 	}
@@ -34,6 +40,12 @@ public class ClientController {
 	) {
 		clientServicePort.cancellationSubscription(clientId, request.fundId());
 		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/{id}/subscriptions")
+	ResponseEntity<List<FundSubscribedResponse>> getSubscriptions(@PathVariable("id") String clientId) {
+		List<FundSubscribed> funds = clientServicesPort.listAssociatedFunds(clientId);
+		return ResponseEntity.ok(clientMapperResponse.toDto(funds));
 	}
 
 }
