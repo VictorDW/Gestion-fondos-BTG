@@ -1,7 +1,7 @@
 package com.victordw.btg.domain.api.usecase;
 
 import com.victordw.btg.domain.api.IClientServicePort;
-import com.victordw.btg.domain.api.IFundServiceBasic;
+import com.victordw.btg.domain.api.IFundService;
 import com.victordw.btg.domain.api.ITransactionService;
 import com.victordw.btg.domain.exception.FundAlreadyExistsException;
 import com.victordw.btg.domain.exception.InvestmentAmountException;
@@ -9,6 +9,7 @@ import com.victordw.btg.domain.exception.NotFoundException;
 import com.victordw.btg.domain.model.Client;
 import com.victordw.btg.domain.model.FundSubscribed;
 import com.victordw.btg.domain.model.InvestmentFund;
+import com.victordw.btg.domain.model.Transaction;
 import com.victordw.btg.domain.spi.IClientPersistencePort;
 import com.victordw.btg.domain.spi.ISendNotificationPort;
 import com.victordw.btg.domain.util.ConstantDomain;
@@ -23,7 +24,7 @@ import java.util.function.Function;
 public class ClientUseCase implements IClientServicePort {
 
 	private final IClientPersistencePort clientPersistencePort;
-	private final IFundServiceBasic fundService;
+	private final IFundService fundService;
 	private final ITransactionService transactionService;
 	private final Function<String, ISendNotificationPort> methodSend;
 
@@ -84,7 +85,7 @@ public class ClientUseCase implements IClientServicePort {
 		);
 	}
 
-	private Client getClient(String clientId) {
+	public Client getClient(String clientId) {
 		return clientPersistencePort.getClient(clientId)
 				.orElseThrow(()-> new NotFoundException(
 						String.format(
@@ -155,5 +156,10 @@ public class ClientUseCase implements IClientServicePort {
 	@Override
 	public Client getClientInformation(String clientId) {
 		return this.getClient(clientId);
+	}
+
+	@Override
+	public List<Transaction> getAllTransaction(String clientId) {
+		return transactionService.getAllTransaction(clientId);
 	}
 }

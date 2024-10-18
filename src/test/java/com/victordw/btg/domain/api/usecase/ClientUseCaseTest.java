@@ -1,7 +1,7 @@
 package com.victordw.btg.domain.api.usecase;
 
 
-import com.victordw.btg.domain.api.IFundServiceBasic;
+import com.victordw.btg.domain.api.IFundService;
 import com.victordw.btg.domain.api.ITransactionService;
 import com.victordw.btg.domain.exception.FundAlreadyExistsException;
 import com.victordw.btg.domain.exception.InvestmentAmountException;
@@ -37,7 +37,7 @@ class ClientUseCaseTest {
 	private IClientPersistencePort clientPersistencePort;
 
 	@Mock
-	private IFundServiceBasic fundService;
+	private IFundService fundService;
 
 	@Mock
 	private ITransactionService transactionService;

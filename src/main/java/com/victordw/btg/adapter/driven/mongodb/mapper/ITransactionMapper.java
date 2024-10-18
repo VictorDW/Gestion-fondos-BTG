@@ -8,4 +8,5 @@ import org.mapstruct.Mapper;
 public interface ITransactionMapper {
 
 	TransactionDoc toDoc(Transaction transaction);
+	Transaction toModel(TransactionDoc transactionDoc);
 }

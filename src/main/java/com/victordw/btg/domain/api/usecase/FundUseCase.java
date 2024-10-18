@@ -1,6 +1,6 @@
 package com.victordw.btg.domain.api.usecase;
 
-import com.victordw.btg.domain.api.IFundServiceBasic;
+import com.victordw.btg.domain.api.IFundService;
 import com.victordw.btg.domain.api.IFundServicesPort;
 import com.victordw.btg.domain.exception.NotFoundException;
 import com.victordw.btg.domain.model.InvestmentFund;
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class FundUseCase implements IFundServicesPort, IFundServiceBasic {
+public class FundUseCase implements IFundServicesPort, IFundService {
 
 	private final IFundPersistencePort fundPersistencePort;
 

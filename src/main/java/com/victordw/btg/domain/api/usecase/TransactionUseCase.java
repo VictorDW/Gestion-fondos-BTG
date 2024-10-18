@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class TransactionUseCase implements ITransactionService {
@@ -27,5 +28,10 @@ public class TransactionUseCase implements ITransactionService {
 				.mount(amount)
 				.dateRegistration(LocalDateTime.now())
 				.build();
+	}
+
+	@Override
+	public List<Transaction> getAllTransaction(String clientId) {
+		return transactionPersistencePort.getAllTransactionByClientId(clientId);
 	}
 }

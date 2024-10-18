@@ -6,7 +6,10 @@ import com.victordw.btg.adapter.driven.mongodb.repository.ITransactionRepository
 import com.victordw.btg.domain.model.Transaction;
 import com.victordw.btg.domain.spi.ITransactionPersistencePort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,5 +22,18 @@ public class TransactionPersistenceAdapter implements ITransactionPersistencePor
 	public void saveTransaction(Transaction transaction) {
 		TransactionDoc transactionDoc = transactionMapper.toDoc(transaction);
 		transactionRepository.save(transactionDoc);
+	}
+
+	@Override
+	public List<Transaction> getAllTransactionByClientId(String clientId) {
+
+		Sort.Direction direction = Sort.Direction.DESC;
+		Sort sort = Sort.by(direction, "dateRegistration");
+
+		return transactionRepository.findAllByClientId(clientId, sort)
+				.stream()
+				.map(transactionMapper::toModel)
+				.limit(10)
+				.toList();
 	}
 }
