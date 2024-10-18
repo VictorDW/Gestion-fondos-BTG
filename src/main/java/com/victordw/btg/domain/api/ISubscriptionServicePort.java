@@ -5,4 +5,5 @@ import com.victordw.btg.domain.model.FundSubscribed;
 public interface ISubscriptionServicePort {
 
 	void addSubscription(String clientId, FundSubscribed fundSubscribed);
+	void cancellationSubscription(String clientId, Long fundId);
 }

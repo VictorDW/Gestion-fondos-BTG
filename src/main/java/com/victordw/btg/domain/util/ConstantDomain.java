@@ -31,4 +31,5 @@ public class ConstantDomain {
 	public static final String AMOUNT_TO_INVEST_IS_NOT_VALID = "El monto a invertir no cumple con el mínimo necesario para vincularse al fondo %s";
 	public static final String INSUFFICIENT_BALANCE = "No tiene saldo disponible para vincularse al fondo %s";
 	public static final String FUND_ALREADY_EXISTS = "Ya cuentas con una suscrición al fondo %s";
+	public static final String UNSUBSCRIBED_INVESTMENT_FUND = "No te encuentras suscrito al fondo con id %s";
 }

@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 @RequiredArgsConstructor
@@ -29,13 +30,7 @@ public class ClientUseCase implements ISubscriptionServicePort {
 	@Override
 	public void addSubscription(String clientId, FundSubscribed fundSubscribed) {
 
-		Client client = clientPersistencePort.getClient(clientId)
-				.orElseThrow(()-> new NotFoundException(
-						String.format(
-								ConstantDomain.NOT_FOUND_MESSAGE,
-								ConstantDomain.Utils.CLIENT.get(),
-								clientId)
-				));
+		Client client = this.getClient(clientId);
 
 		InvestmentFund fund = fundService.getFundById(fundSubscribed.fundId());
 		this.validateAmountToInvestedAndAvailableBalance(
@@ -46,8 +41,8 @@ public class ClientUseCase implements ISubscriptionServicePort {
 		this.validateIfAlreadySubscribedToFund(client.getFundsSubscribed(), fund);
 
 		client.getFundsSubscribed().add(fundSubscribed);
-		this.deductInvestmentFromAvailableBalance(client, fundSubscribed.investmentAmount());
-		clientPersistencePort.saveClient(client);
+		this.updateAvailableBalance(client, fundSubscribed.investmentAmount(), ConstantDomain.TYPE_OPENING);
+		this.clientPersistencePort.saveClient(client);
 		this.transactionService.registerTransaction(
 				client.getId(),
 				fund.getName(),
@@ -55,6 +50,48 @@ public class ClientUseCase implements ISubscriptionServicePort {
 				ConstantDomain.TYPE_OPENING
 		);
 		this.defineSendMethod(client, fund);
+	}
+
+	@Override
+	public void cancellationSubscription(String clientId, Long fundId) {
+
+		Client client = this.getClient(clientId);
+		String nameFund = fundService.getFundById(fundId).getName();
+		int position;
+
+		Optional<FundSubscribed> fundToCancelled = client
+				.getFundsSubscribed().stream()
+				.filter(fundSubscribed -> fundId.equals(fundSubscribed.fundId()))
+				.findFirst();
+
+		if (fundToCancelled.isEmpty()) {
+			throw new NotFoundException(
+					String.format(
+							ConstantDomain.UNSUBSCRIBED_INVESTMENT_FUND,
+							fundId)
+			);
+		}
+
+		position = client.getFundsSubscribed().indexOf(fundToCancelled.get());
+		client.getFundsSubscribed().remove(position);
+		this.updateAvailableBalance(client, fundToCancelled.get().investmentAmount(), ConstantDomain.TYPE_CANCELLATION);
+		this.clientPersistencePort.saveClient(client);
+		this.transactionService.registerTransaction(
+				client.getId(),
+				nameFund,
+				fundToCancelled.get().investmentAmount(),
+				ConstantDomain.TYPE_CANCELLATION
+		);
+	}
+
+	private Client getClient(String clientId) {
+		return clientPersistencePort.getClient(clientId)
+				.orElseThrow(()-> new NotFoundException(
+						String.format(
+								ConstantDomain.NOT_FOUND_MESSAGE,
+								ConstantDomain.Utils.CLIENT.get(),
+								clientId)
+				));
 	}
 
 	private void validateAmountToInvestedAndAvailableBalance(
@@ -85,9 +122,11 @@ public class ClientUseCase implements ISubscriptionServicePort {
 		});
 	}
 
-	private void deductInvestmentFromAvailableBalance(Client client, BigDecimal investmentAmount) {
+	private void updateAvailableBalance(Client client, BigDecimal investmentAmount, String type) {
 		BigDecimal availableBalance = client.getAvailableBalance();
-		BigDecimal newBalance = availableBalance.subtract(investmentAmount);
+		BigDecimal newBalance = type.equals(ConstantDomain.TYPE_OPENING) ?
+				availableBalance.subtract(investmentAmount) :
+				availableBalance.add(investmentAmount);
 		client.setAvailableBalance(newBalance);
 	}
 
