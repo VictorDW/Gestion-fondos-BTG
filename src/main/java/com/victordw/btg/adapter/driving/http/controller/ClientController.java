@@ -2,10 +2,12 @@ package com.victordw.btg.adapter.driving.http.controller;
 
 import com.victordw.btg.adapter.driving.http.dto.request.FundCancellationRequest;
 import com.victordw.btg.adapter.driving.http.dto.request.FundSubscribedRequest;
+import com.victordw.btg.adapter.driving.http.dto.response.ClientInfoResponse;
 import com.victordw.btg.adapter.driving.http.dto.response.FundSubscribedResponse;
 import com.victordw.btg.adapter.driving.http.mapper.request.IClientMapperRequest;
 import com.victordw.btg.adapter.driving.http.mapper.response.IClientMapperResponse;
 import com.victordw.btg.domain.api.IClientServicePort;
+import com.victordw.btg.domain.model.Client;
 import com.victordw.btg.domain.model.FundSubscribed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +47,13 @@ public class ClientController {
 	@GetMapping("/{id}/subscriptions")
 	ResponseEntity<List<FundSubscribedResponse>> getSubscriptions(@PathVariable("id") String clientId) {
 		List<FundSubscribed> funds = clientServicesPort.listAssociatedFunds(clientId);
-		return ResponseEntity.ok(clientMapperResponse.toDto(funds));
+		return ResponseEntity.ok(clientMapperResponse.toDtoList(funds));
+	}
+
+	@GetMapping("/{id}")
+	ResponseEntity<ClientInfoResponse> getInfoClient(@PathVariable("id") String clientId) {
+		Client client = clientServicesPort.getClientInformation(clientId);
+		return ResponseEntity.ok(clientMapperResponse.toDto(client));
 	}
 
 }

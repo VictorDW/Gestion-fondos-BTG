@@ -151,4 +151,9 @@ public class ClientUseCase implements IClientServicePort {
 	public List<FundSubscribed> listAssociatedFunds(String clientId) {
 		return this.getClient(clientId).getFundsSubscribed();
 	}
+
+	@Override
+	public Client getClientInformation(String clientId) {
+		return this.getClient(clientId);
+	}
 }
