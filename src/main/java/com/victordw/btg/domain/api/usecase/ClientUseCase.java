@@ -43,17 +43,17 @@ public class ClientUseCase implements ISubscriptionServicePort {
 				fund,
 				client.getAvailableBalance()
 		);
-		//this.validateIfAlreadySubscribedToFund(client.getFundsSubscribed(), fund);
+		this.validateIfAlreadySubscribedToFund(client.getFundsSubscribed(), fund);
 
-		//client.getFundsSubscribed().add(fundSubscribed);
-		//this.deductInvestmentFromAvailableBalance(client, fundSubscribed.investmentAmount());
-		//clientPersistencePort.saveClient(client);
-		/*this.transactionService.registerTransaction(
+		client.getFundsSubscribed().add(fundSubscribed);
+		this.deductInvestmentFromAvailableBalance(client, fundSubscribed.investmentAmount());
+		clientPersistencePort.saveClient(client);
+		this.transactionService.registerTransaction(
 				client.getId(),
 				fund.getName(),
 				fundSubscribed.investmentAmount(),
 				ConstantDomain.TYPE_OPENING
-		);*/
+		);
 		this.defineSendMethod(client, fund);
 	}
 

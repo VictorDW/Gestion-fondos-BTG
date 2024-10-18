@@ -9,11 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class SmsAdapter implements ISendNotificationPort {
-
-	@Value("${twilio.phone.default}")
-	private String phoneFrom;
 
 	@Override
 	public void sendNotification(String... arg) {
@@ -23,7 +19,7 @@ public class SmsAdapter implements ISendNotificationPort {
 
 		Message.creator(
 				new PhoneNumber(phoneTo),
-				new PhoneNumber(phoneFrom),
+				new PhoneNumber(Constants.TWILIO_FROM_PHONE_DEFAULT),
 				message)
 		.create();
 

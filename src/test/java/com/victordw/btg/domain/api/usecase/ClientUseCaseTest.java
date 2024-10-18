@@ -1,5 +1,6 @@
 package com.victordw.btg.domain.api.usecase;
 
+
 import com.victordw.btg.domain.api.IFundServiceBasic;
 import com.victordw.btg.domain.api.ITransactionService;
 import com.victordw.btg.domain.exception.FundAlreadyExistsException;
@@ -9,6 +10,7 @@ import com.victordw.btg.domain.model.Client;
 import com.victordw.btg.domain.model.FundSubscribed;
 import com.victordw.btg.domain.model.InvestmentFund;
 import com.victordw.btg.domain.spi.IClientPersistencePort;
+import com.victordw.btg.domain.spi.ISendNotificationPort;
 import com.victordw.btg.domain.util.ConstantDomain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,11 +43,17 @@ class ClientUseCaseTest {
 	@Mock
 	private ITransactionService transactionService;
 
+	@Mock
+	private ISendNotificationPort notificationPort;
+
+	@Mock
+	private Function<String, ISendNotificationPort> methodSend;
+
 	@InjectMocks
 	private ClientUseCase clientUseCase;
 
 	@Test
-	@DisplayName("must successfully add a subscription")
+	@DisplayName("must correctly add a subscription with sms notification")
 	void test1() {
 
 		// GIVEN
@@ -54,6 +63,8 @@ class ClientUseCaseTest {
 		Client client = Client.builder()
 				.id(clientId)
 				.availableBalance(new BigDecimal("500000"))
+				.cellPhone("+573186360926")
+				.notificationPreference("sms")
 				.fundsSubscribed(new ArrayList<>())
 				.build();
 		InvestmentFund fund = InvestmentFund.builder()
@@ -62,9 +73,12 @@ class ClientUseCaseTest {
 				.minimumAmount(new BigDecimal("75000"))
 				.category("FVP")
 				.build();
+		String message = String.format(ConstantDomain.MESSAGE_NOTIFICATION, fund.getName());
 
 		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
 		given(fundService.getFundById(fundSubscribed.fundId())).willReturn(fund);
+		given(methodSend.apply(client.getNotificationPreference())).willReturn(notificationPort);
+
 
 		// WHEN
 		clientUseCase.addSubscription(clientId, fundSubscribed);
@@ -79,6 +93,7 @@ class ClientUseCaseTest {
 				fundSubscribed.investmentAmount(),
 				ConstantDomain.TYPE_OPENING
 		);
+		verify(notificationPort).sendNotification(client.getCellPhone(), message);
 	}
 
 	@Test
@@ -190,4 +205,50 @@ class ClientUseCaseTest {
 				() -> clientUseCase.addSubscription(clientId, fundSubscribed)
 		);
 	}
+
+
+	@Test
+	@DisplayName("must correctly add a subscription with mail notification")
+	void test6() {
+
+		// GIVEN
+		String clientId = "client-123";
+		BigDecimal deductAmount = new BigDecimal("300000");
+		FundSubscribed fundSubscribed = new FundSubscribed(1L, new BigDecimal("200000"));
+		Client client = Client.builder()
+				.id(clientId)
+				.availableBalance(new BigDecimal("500000"))
+				.cellPhone("+573186360926")
+				.notificationPreference("correo")
+				.fundsSubscribed(new ArrayList<>())
+				.build();
+		InvestmentFund fund = InvestmentFund.builder()
+				.id(1L)
+				.name("FPV_BTG_PACTUAL_RECAUDADORA")
+				.minimumAmount(new BigDecimal("75000"))
+				.category("FVP")
+				.build();
+		String message = String.format(ConstantDomain.MESSAGE_NOTIFICATION, fund.getName());
+
+		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
+		given(fundService.getFundById(fundSubscribed.fundId())).willReturn(fund);
+		given(methodSend.apply(client.getNotificationPreference())).willReturn(notificationPort);
+
+
+		// WHEN
+		clientUseCase.addSubscription(clientId, fundSubscribed);
+
+		// THAT
+		assertEquals(deductAmount, client.getAvailableBalance());
+		assertTrue(client.getFundsSubscribed().contains(fundSubscribed));
+		verify(clientPersistencePort).saveClient(client);
+		verify(transactionService).registerTransaction(
+				clientId,
+				fund.getName(),
+				fundSubscribed.investmentAmount(),
+				ConstantDomain.TYPE_OPENING
+		);
+		verify(notificationPort).sendNotification(client.getEmail(), ConstantDomain.SUBJECT, message);
+	}
+
 }
