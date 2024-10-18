@@ -30,7 +30,7 @@ public class ClientDoc {
 	private String email;
 
 	@Field("cellphone")
-	private String cellphone;
+	private String cellPhone;
 
 	@Field("available_balance")
 	private BigDecimal availableBalance;

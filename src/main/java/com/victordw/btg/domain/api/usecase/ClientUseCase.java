@@ -10,11 +10,13 @@ import com.victordw.btg.domain.model.Client;
 import com.victordw.btg.domain.model.FundSubscribed;
 import com.victordw.btg.domain.model.InvestmentFund;
 import com.victordw.btg.domain.spi.IClientPersistencePort;
+import com.victordw.btg.domain.spi.ISendNotificationPort;
 import com.victordw.btg.domain.util.ConstantDomain;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.function.Function;
 
 @RequiredArgsConstructor
 public class ClientUseCase implements ISubscriptionServicePort {
@@ -22,6 +24,7 @@ public class ClientUseCase implements ISubscriptionServicePort {
 	private final IClientPersistencePort clientPersistencePort;
 	private final IFundServiceBasic fundService;
 	private final ITransactionService transactionService;
+	private final Function<String, ISendNotificationPort> methodSend;
 
 	@Override
 	public void addSubscription(String clientId, FundSubscribed fundSubscribed) {
@@ -40,17 +43,18 @@ public class ClientUseCase implements ISubscriptionServicePort {
 				fund,
 				client.getAvailableBalance()
 		);
-		this.validateIfAlreadySubscribedToFund(client.getFundsSubscribed(), fund);
+		//this.validateIfAlreadySubscribedToFund(client.getFundsSubscribed(), fund);
 
-		client.getFundsSubscribed().add(fundSubscribed);
-		this.deductInvestmentFromAvailableBalance(client, fundSubscribed.investmentAmount());
-		clientPersistencePort.saveClient(client);
-		this.transactionService.registerTransaction(
+		//client.getFundsSubscribed().add(fundSubscribed);
+		//this.deductInvestmentFromAvailableBalance(client, fundSubscribed.investmentAmount());
+		//clientPersistencePort.saveClient(client);
+		/*this.transactionService.registerTransaction(
 				client.getId(),
 				fund.getName(),
 				fundSubscribed.investmentAmount(),
 				ConstantDomain.TYPE_OPENING
-		);
+		);*/
+		this.defineSendMethod(client, fund);
 	}
 
 	private void validateAmountToInvestedAndAvailableBalance(
@@ -85,6 +89,19 @@ public class ClientUseCase implements ISubscriptionServicePort {
 		BigDecimal availableBalance = client.getAvailableBalance();
 		BigDecimal newBalance = availableBalance.subtract(investmentAmount);
 		client.setAvailableBalance(newBalance);
+	}
+
+	private void defineSendMethod(Client client, InvestmentFund fund) {
+
+		ISendNotificationPort notificationPort = methodSend.apply(client.getNotificationPreference());
+		String message = String.format(ConstantDomain.MESSAGE_NOTIFICATION, fund.getName());
+
+		if (client.getNotificationPreference().equalsIgnoreCase(ConstantDomain.SMS)) {
+			notificationPort.sendNotification(client.getCellPhone(), message);
+			return;
+		}
+
+		notificationPort.sendNotification(client.getEmail(), ConstantDomain.SUBJECT, message);
 	}
 
 }
