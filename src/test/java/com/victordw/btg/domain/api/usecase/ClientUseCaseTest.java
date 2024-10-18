@@ -20,9 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -249,6 +247,74 @@ class ClientUseCaseTest {
 				ConstantDomain.TYPE_OPENING
 		);
 		verify(notificationPort).sendNotification(client.getEmail(), ConstantDomain.SUBJECT, message);
+	}
+
+	@Test
+	@DisplayName("must cancel a subscription and add the amount to the available balance")
+	void test7() {
+
+		// GIVEN
+		String clientId = "client-123";
+		Long fundId = 1L;
+		BigDecimal aggregateAmount = new BigDecimal("500000");
+		FundSubscribed fundSubscribed = new FundSubscribed(1L, new BigDecimal("200000"));
+		Client client = Client.builder()
+				.id(clientId)
+				.availableBalance(new BigDecimal("300000"))
+				.cellPhone("+573186360926")
+				.notificationPreference("sms")
+				.fundsSubscribed(new ArrayList<>(Collections.singleton(fundSubscribed)))
+				.build();
+		InvestmentFund fund = InvestmentFund.builder()
+				.id(1L)
+				.name("FPV_BTG_PACTUAL_RECAUDADORA")
+				.minimumAmount(new BigDecimal("75000"))
+				.category("FVP")
+				.build();
+
+		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
+		given(fundService.getFundById(fundSubscribed.fundId())).willReturn(fund);
+
+		// WHEN
+		clientUseCase.cancellationSubscription(clientId, fundId);
+
+		// THAT
+		assertEquals(aggregateAmount, client.getAvailableBalance());
+		assertFalse(client.getFundsSubscribed().contains(fundSubscribed));
+		verify(clientPersistencePort).saveClient(client);
+		verify(transactionService).registerTransaction(
+				clientId,
+				fund.getName(),
+				fundSubscribed.investmentAmount(),
+				ConstantDomain.TYPE_CANCELLATION
+		);
+	}
+
+	@Test
+	@DisplayName("must throw an exception when you want to cancel a fund to which you are not subscribed. ")
+	void test8() {
+		// GIVEN
+		String clientId = "client-123";
+		Long fundId = 1L;
+		Client client = Client.builder()
+				.id(clientId)
+				.availableBalance(new BigDecimal("300000"))
+				.fundsSubscribed(new ArrayList<>())
+				.build();
+		InvestmentFund fund = InvestmentFund.builder()
+				.id(1L)
+				.name("FPV_BTG_PACTUAL_RECAUDADORA")
+				.minimumAmount(new BigDecimal("75000"))
+				.category("FVP")
+				.build();
+
+		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
+		given(fundService.getFundById(fundId)).willReturn(fund);
+
+		// WHEN -THAT
+		assertThrows(NotFoundException.class,
+				() -> clientUseCase.cancellationSubscription(clientId, fundId)
+		);
 	}
 
 }
