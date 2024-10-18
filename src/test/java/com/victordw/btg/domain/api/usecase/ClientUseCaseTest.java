@@ -12,6 +12,7 @@ import com.victordw.btg.domain.model.InvestmentFund;
 import com.victordw.btg.domain.spi.IClientPersistencePort;
 import com.victordw.btg.domain.spi.ISendNotificationPort;
 import com.victordw.btg.domain.util.ConstantDomain;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,12 +51,18 @@ class ClientUseCaseTest {
 	@InjectMocks
 	private ClientUseCase clientUseCase;
 
+	String clientId;
+
+	@BeforeEach
+	void setup() {
+		clientId = "client-123";
+	}
+
 	@Test
 	@DisplayName("must correctly add a subscription with sms notification")
 	void test1() {
 
 		// GIVEN
-		String clientId = "client-123";
 		BigDecimal deductAmount = new BigDecimal("300000");
 		FundSubscribed fundSubscribed = FundSubscribed.builder()
 				.fundId(1L)
@@ -101,7 +108,6 @@ class ClientUseCaseTest {
 	@DisplayName("must throw an exception when the client does not exist")
 	void test2() {
 		// GIVEN
-		String clientId = "client-123";
 		FundSubscribed fundSubscribed = FundSubscribed.builder()
 				.fundId(1L)
 				.investmentAmount(new BigDecimal("200000"))
@@ -124,7 +130,6 @@ class ClientUseCaseTest {
 	@DisplayName("should throw an exception when the available balance is not sufficient")
 	void test3() {
 		// GIVEN
-		String clientId = "client-123";
 		FundSubscribed fundSubscribed = FundSubscribed.builder()
 				.fundId(1L)
 				.investmentAmount(new BigDecimal("75000"))
@@ -158,7 +163,6 @@ class ClientUseCaseTest {
 	@DisplayName("an exception must be triggered when the investment amount is less than the minimum amount allowed by the fund.")
 	void test4() {
 		// GIVEN
-		String clientId = "client-123";
 		FundSubscribed fundSubscribed = FundSubscribed.builder()
 				.fundId(1L)
 				.investmentAmount(new BigDecimal("50000"))
@@ -193,7 +197,6 @@ class ClientUseCaseTest {
 	@DisplayName("must throw an exception when you want to subscribe to a fund to which you are already subscribed")
 	void test5() {
 		// GIVEN
-		String clientId = "client-123";
 		FundSubscribed fundSubscribed = FundSubscribed.builder()
 				.fundId(1L)
 				.investmentAmount(new BigDecimal("75000"))
@@ -225,7 +228,6 @@ class ClientUseCaseTest {
 	void test6() {
 
 		// GIVEN
-		String clientId = "client-123";
 		BigDecimal deductAmount = new BigDecimal("300000");
 		FundSubscribed fundSubscribed = FundSubscribed.builder()
 				.fundId(1L)
@@ -272,7 +274,6 @@ class ClientUseCaseTest {
 	void test7() {
 
 		// GIVEN
-		String clientId = "client-123";
 		Long fundId = 1L;
 		BigDecimal aggregateAmount = new BigDecimal("500000");
 		FundSubscribed fundSubscribed = FundSubscribed.builder()
@@ -315,7 +316,6 @@ class ClientUseCaseTest {
 	@DisplayName("must throw an exception when you want to cancel a fund to which you are not subscribed. ")
 	void test8() {
 		// GIVEN
-		String clientId = "client-123";
 		Long fundId = 1L;
 		Client client = Client.builder()
 				.id(clientId)
@@ -336,6 +336,46 @@ class ClientUseCaseTest {
 		assertThrows(NotFoundException.class,
 				() -> clientUseCase.cancellationSubscription(clientId, fundId)
 		);
+	}
+
+	@Test
+	@DisplayName("must return a list of subscribed funds")
+	void test9() {
+		//GIVEN
+		Client client = Client.builder()
+				.id(clientId)
+				.name("Juan Perez")
+				.availableBalance(new BigDecimal("300000"))
+				.fundsSubscribed(new ArrayList<>())
+				.build();
+
+		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
+
+		//WHEN
+		List<FundSubscribed> resul = clientUseCase.listAssociatedFunds(clientId);
+
+		//THAT
+		assertNotNull(resul);
+	}
+
+	@Test
+	@DisplayName("must return a list of subscribed funds")
+	void test10() {
+		//GIVEN
+		Client client = Client.builder()
+				.id(clientId)
+				.name("Juan Perez")
+				.availableBalance(new BigDecimal("300000"))
+				.build();
+
+		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
+
+		//WHEN
+		Client resul = clientUseCase.getClientInformation(clientId);
+
+		//THAT
+		assertNotNull(resul);
+		assertEquals(client, resul);
 	}
 
 }
