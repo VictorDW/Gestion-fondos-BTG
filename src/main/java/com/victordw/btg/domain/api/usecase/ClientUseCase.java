@@ -1,6 +1,6 @@
 package com.victordw.btg.domain.api.usecase;
 
-import com.victordw.btg.domain.api.ISubscriptionServicePort;
+import com.victordw.btg.domain.api.IClientServicePort;
 import com.victordw.btg.domain.api.IFundServiceBasic;
 import com.victordw.btg.domain.api.ITransactionService;
 import com.victordw.btg.domain.exception.FundAlreadyExistsException;
@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @RequiredArgsConstructor
-public class ClientUseCase implements ISubscriptionServicePort {
+public class ClientUseCase implements IClientServicePort {
 
 	private final IClientPersistencePort clientPersistencePort;
 	private final IFundServiceBasic fundService;
@@ -147,4 +147,8 @@ public class ClientUseCase implements ISubscriptionServicePort {
 		notificationPort.sendNotification(client.getEmail(), ConstantDomain.SUBJECT, message);
 	}
 
+	/*@Override
+	public List<FundSubscribed> listAssociatedFunds(String clientId) {
+		return this.getClient(clientId).getFundsSubscribed();
+	}*/
 }

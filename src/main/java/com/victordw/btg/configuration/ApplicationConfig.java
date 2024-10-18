@@ -2,7 +2,7 @@ package com.victordw.btg.configuration;
 
 import com.victordw.btg.adapter.driven.mail.adapter.EmailAdapter;
 import com.victordw.btg.adapter.driven.sms.adapter.SmsAdapter;
-import com.victordw.btg.domain.api.ISubscriptionServicePort;
+import com.victordw.btg.domain.api.IClientServicePort;
 import com.victordw.btg.domain.api.IFundServiceBasic;
 import com.victordw.btg.domain.api.IFundServicesPort;
 import com.victordw.btg.domain.api.ITransactionService;
@@ -50,7 +50,7 @@ public class ApplicationConfig {
 	}
 
 	@Bean
-	public ISubscriptionServicePort clientServicesPort() {
+	public IClientServicePort clientServicesPort() {
 		return new ClientUseCase(clientPersistencePort, (IFundServiceBasic) fundServicesPort(), transactionService(), defineShippingMethod());
 	}
 
