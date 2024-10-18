@@ -31,22 +31,22 @@ public class ClientUseCase implements ISubscriptionServicePort {
 	public void addSubscription(String clientId, FundSubscribed fundSubscribed) {
 
 		Client client = this.getClient(clientId);
+		InvestmentFund fund = fundService.getFundById(fundSubscribed.getFundId());
 
-		InvestmentFund fund = fundService.getFundById(fundSubscribed.fundId());
 		this.validateAmountToInvestedAndAvailableBalance(
-				fundSubscribed.investmentAmount(),
+				fundSubscribed.getInvestmentAmount(),
 				fund,
 				client.getAvailableBalance()
 		);
 		this.validateIfAlreadySubscribedToFund(client.getFundsSubscribed(), fund);
-
+		this.addExtraInformationToFundSubscribed(fund.getName(), fundSubscribed);
 		client.getFundsSubscribed().add(fundSubscribed);
-		this.updateAvailableBalance(client, fundSubscribed.investmentAmount(), ConstantDomain.TYPE_OPENING);
+		this.updateAvailableBalance(client, fundSubscribed.getInvestmentAmount(), ConstantDomain.TYPE_OPENING);
 		this.clientPersistencePort.saveClient(client);
 		this.transactionService.registerTransaction(
 				client.getId(),
 				fund.getName(),
-				fundSubscribed.investmentAmount(),
+				fundSubscribed.getInvestmentAmount(),
 				ConstantDomain.TYPE_OPENING
 		);
 		this.defineSendMethod(client, fund);
@@ -61,7 +61,7 @@ public class ClientUseCase implements ISubscriptionServicePort {
 
 		Optional<FundSubscribed> fundToCancelled = client
 				.getFundsSubscribed().stream()
-				.filter(fundSubscribed -> fundId.equals(fundSubscribed.fundId()))
+				.filter(fundSubscribed -> fundId.equals(fundSubscribed.getFundId()))
 				.findFirst();
 
 		if (fundToCancelled.isEmpty()) {
@@ -74,12 +74,12 @@ public class ClientUseCase implements ISubscriptionServicePort {
 
 		position = client.getFundsSubscribed().indexOf(fundToCancelled.get());
 		client.getFundsSubscribed().remove(position);
-		this.updateAvailableBalance(client, fundToCancelled.get().investmentAmount(), ConstantDomain.TYPE_CANCELLATION);
+		this.updateAvailableBalance(client, fundToCancelled.get().getInvestmentAmount(), ConstantDomain.TYPE_CANCELLATION);
 		this.clientPersistencePort.saveClient(client);
 		this.transactionService.registerTransaction(
 				client.getId(),
 				nameFund,
-				fundToCancelled.get().investmentAmount(),
+				fundToCancelled.get().getInvestmentAmount(),
 				ConstantDomain.TYPE_CANCELLATION
 		);
 	}
@@ -107,13 +107,17 @@ public class ClientUseCase implements ISubscriptionServicePort {
 		}
 	}
 
+	private void addExtraInformationToFundSubscribed(String nameFund, FundSubscribed fundSubscribed) {
+		fundSubscribed.setName(nameFund);
+	}
+
 	private void investmentAmountException(String message, String fund) {
 		throw new InvestmentAmountException(String.format(message, fund));
 	}
 
 	private void validateIfAlreadySubscribedToFund(List<FundSubscribed> funds, InvestmentFund fundToSubscribed) {
 		funds.forEach(fundSubscribed -> {
-			if (fundSubscribed.fundId().equals(fundToSubscribed.getId())) {
+			if (fundSubscribed.getFundId().equals(fundToSubscribed.getId())) {
 				throw new FundAlreadyExistsException(String.format(
 						ConstantDomain.FUND_ALREADY_EXISTS,
 						fundToSubscribed.getName()

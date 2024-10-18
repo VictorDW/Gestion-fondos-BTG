@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public record FundSubscribedDoc(
 		Long fundId,
+		String name,
 		BigDecimal investmentAmount
 ) {
 }
