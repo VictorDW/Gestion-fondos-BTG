@@ -57,7 +57,10 @@ class ClientUseCaseTest {
 		// GIVEN
 		String clientId = "client-123";
 		BigDecimal deductAmount = new BigDecimal("300000");
-		FundSubscribed fundSubscribed = new FundSubscribed(1L, new BigDecimal("200000"));
+		FundSubscribed fundSubscribed = FundSubscribed.builder()
+				.fundId(1L)
+				.investmentAmount(new BigDecimal("200000"))
+				.build();
 		Client client = Client.builder()
 				.id(clientId)
 				.availableBalance(new BigDecimal("500000"))
@@ -74,7 +77,7 @@ class ClientUseCaseTest {
 		String message = String.format(ConstantDomain.MESSAGE_NOTIFICATION, fund.getName());
 
 		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
-		given(fundService.getFundById(fundSubscribed.fundId())).willReturn(fund);
+		given(fundService.getFundById(fundSubscribed.getFundId())).willReturn(fund);
 		given(methodSend.apply(client.getNotificationPreference())).willReturn(notificationPort);
 
 
@@ -88,7 +91,7 @@ class ClientUseCaseTest {
 		verify(transactionService).registerTransaction(
 				clientId,
 				fund.getName(),
-				fundSubscribed.investmentAmount(),
+				fundSubscribed.getInvestmentAmount(),
 				ConstantDomain.TYPE_OPENING
 		);
 		verify(notificationPort).sendNotification(client.getCellPhone(), message);
@@ -99,7 +102,10 @@ class ClientUseCaseTest {
 	void test2() {
 		// GIVEN
 		String clientId = "client-123";
-		FundSubscribed fundSubscribed = new FundSubscribed(1L, new BigDecimal("200000"));
+		FundSubscribed fundSubscribed = FundSubscribed.builder()
+				.fundId(1L)
+				.investmentAmount(new BigDecimal("200000"))
+				.build();
 
 		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.empty());
 
@@ -119,7 +125,10 @@ class ClientUseCaseTest {
 	void test3() {
 		// GIVEN
 		String clientId = "client-123";
-		FundSubscribed fundSubscribed = new FundSubscribed(1L, new BigDecimal("75000"));
+		FundSubscribed fundSubscribed = FundSubscribed.builder()
+				.fundId(1L)
+				.investmentAmount(new BigDecimal("75000"))
+				.build();
 		Client client = Client.builder()
 				.id(clientId)
 				.availableBalance(new BigDecimal("50000"))
@@ -133,7 +142,7 @@ class ClientUseCaseTest {
 				.build();
 
 		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
-		given(fundService.getFundById(fundSubscribed.fundId())).willReturn(fund);
+		given(fundService.getFundById(fundSubscribed.getFundId())).willReturn(fund);
 
 		// WHEN
 		InvestmentAmountException exception = assertThrows(InvestmentAmountException.class,
@@ -150,7 +159,10 @@ class ClientUseCaseTest {
 	void test4() {
 		// GIVEN
 		String clientId = "client-123";
-		FundSubscribed fundSubscribed = new FundSubscribed(1L, new BigDecimal("50000"));
+		FundSubscribed fundSubscribed = FundSubscribed.builder()
+				.fundId(1L)
+				.investmentAmount(new BigDecimal("50000"))
+				.build();
 		Client client = Client.builder()
 				.id(clientId)
 				.availableBalance(new BigDecimal("100000"))
@@ -164,7 +176,7 @@ class ClientUseCaseTest {
 				.build();
 
 		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
-		given(fundService.getFundById(fundSubscribed.fundId())).willReturn(fund);
+		given(fundService.getFundById(fundSubscribed.getFundId())).willReturn(fund);
 
 		// WHEN
 		InvestmentAmountException exception = assertThrows(InvestmentAmountException.class,
@@ -182,7 +194,10 @@ class ClientUseCaseTest {
 	void test5() {
 		// GIVEN
 		String clientId = "client-123";
-		FundSubscribed fundSubscribed = new FundSubscribed(1L, new BigDecimal("75000"));
+		FundSubscribed fundSubscribed = FundSubscribed.builder()
+				.fundId(1L)
+				.investmentAmount(new BigDecimal("75000"))
+				.build();
 		Client client = Client.builder()
 				.id(clientId)
 				.availableBalance(new BigDecimal("100000"))
@@ -196,7 +211,7 @@ class ClientUseCaseTest {
 				.build();
 
 		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
-		given(fundService.getFundById(fundSubscribed.fundId())).willReturn(fund);
+		given(fundService.getFundById(fundSubscribed.getFundId())).willReturn(fund);
 
 		// WHEN -THAT
 	 assertThrows(FundAlreadyExistsException.class,
@@ -212,7 +227,10 @@ class ClientUseCaseTest {
 		// GIVEN
 		String clientId = "client-123";
 		BigDecimal deductAmount = new BigDecimal("300000");
-		FundSubscribed fundSubscribed = new FundSubscribed(1L, new BigDecimal("200000"));
+		FundSubscribed fundSubscribed = FundSubscribed.builder()
+				.fundId(1L)
+				.investmentAmount(new BigDecimal("200000"))
+				.build();
 		Client client = Client.builder()
 				.id(clientId)
 				.availableBalance(new BigDecimal("500000"))
@@ -229,7 +247,7 @@ class ClientUseCaseTest {
 		String message = String.format(ConstantDomain.MESSAGE_NOTIFICATION, fund.getName());
 
 		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
-		given(fundService.getFundById(fundSubscribed.fundId())).willReturn(fund);
+		given(fundService.getFundById(fundSubscribed.getFundId())).willReturn(fund);
 		given(methodSend.apply(client.getNotificationPreference())).willReturn(notificationPort);
 
 
@@ -243,7 +261,7 @@ class ClientUseCaseTest {
 		verify(transactionService).registerTransaction(
 				clientId,
 				fund.getName(),
-				fundSubscribed.investmentAmount(),
+				fundSubscribed.getInvestmentAmount(),
 				ConstantDomain.TYPE_OPENING
 		);
 		verify(notificationPort).sendNotification(client.getEmail(), ConstantDomain.SUBJECT, message);
@@ -257,7 +275,10 @@ class ClientUseCaseTest {
 		String clientId = "client-123";
 		Long fundId = 1L;
 		BigDecimal aggregateAmount = new BigDecimal("500000");
-		FundSubscribed fundSubscribed = new FundSubscribed(1L, new BigDecimal("200000"));
+		FundSubscribed fundSubscribed = FundSubscribed.builder()
+				.fundId(1L)
+				.investmentAmount(new BigDecimal("200000"))
+				.build();
 		Client client = Client.builder()
 				.id(clientId)
 				.availableBalance(new BigDecimal("300000"))
@@ -273,7 +294,7 @@ class ClientUseCaseTest {
 				.build();
 
 		given(clientPersistencePort.getClient(clientId)).willReturn(Optional.of(client));
-		given(fundService.getFundById(fundSubscribed.fundId())).willReturn(fund);
+		given(fundService.getFundById(fundSubscribed.getFundId())).willReturn(fund);
 
 		// WHEN
 		clientUseCase.cancellationSubscription(clientId, fundId);
@@ -285,7 +306,7 @@ class ClientUseCaseTest {
 		verify(transactionService).registerTransaction(
 				clientId,
 				fund.getName(),
-				fundSubscribed.investmentAmount(),
+				fundSubscribed.getInvestmentAmount(),
 				ConstantDomain.TYPE_CANCELLATION
 		);
 	}
