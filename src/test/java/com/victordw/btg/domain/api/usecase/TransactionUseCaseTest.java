@@ -1,5 +1,6 @@
 package com.victordw.btg.domain.api.usecase;
 
+import com.victordw.btg.domain.model.Transaction;
 import com.victordw.btg.domain.spi.ITransactionPersistencePort;
 import com.victordw.btg.domain.util.ConstantDomain;
 import org.junit.jupiter.api.DisplayName;
@@ -10,9 +11,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,5 +49,30 @@ class TransactionUseCaseTest {
 						transaction.getType().equals(type) &&
 						transaction.getDateRegistration() != null
 		));
+	}
+
+
+	@Test
+	@DisplayName("must return a list of transactions")
+	void test2() {
+
+		//GIVEN
+		String clientId = "client-123";
+		Transaction transaction = Transaction.builder()
+				.id("671184d7d4051e5ddcb389f7")
+				.clientId("670ff7facaba27fa00d268ae")
+				.nameFund("DEUDAPRIVADA")
+				.type(ConstantDomain.TYPE_CANCELLATION)
+				.mount(new BigDecimal(50000))
+				.dateRegistration(LocalDateTime.now())
+				.build();
+
+		given(transactionPersistencePort.getAllTransactionByClientId(clientId)).willReturn(List.of(transaction));
+
+		//WHEN
+		List<Transaction> resul = transactionUseCase.getAllTransaction(clientId);
+
+		//THAT
+		assertNotNull(resul);
 	}
 }

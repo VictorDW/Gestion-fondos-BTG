@@ -9,6 +9,7 @@ import com.victordw.btg.domain.exception.NotFoundException;
 import com.victordw.btg.domain.model.Client;
 import com.victordw.btg.domain.model.FundSubscribed;
 import com.victordw.btg.domain.model.InvestmentFund;
+import com.victordw.btg.domain.model.Transaction;
 import com.victordw.btg.domain.spi.IClientPersistencePort;
 import com.victordw.btg.domain.spi.ISendNotificationPort;
 import com.victordw.btg.domain.util.ConstantDomain;
@@ -21,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 
@@ -376,6 +378,29 @@ class ClientUseCaseTest {
 		//THAT
 		assertNotNull(resul);
 		assertEquals(client, resul);
+	}
+
+	@Test
+	@DisplayName("must return a list of transactions")
+	void test11() {
+
+		//GIVEN
+		Transaction transaction = Transaction.builder()
+				.id("671184d7d4051e5ddcb389f7")
+				.clientId("670ff7facaba27fa00d268ae")
+				.nameFund("DEUDAPRIVADA")
+				.type(ConstantDomain.TYPE_CANCELLATION)
+				.mount(new BigDecimal(50000))
+				.dateRegistration(LocalDateTime.now())
+				.build();
+
+		given(transactionService.getAllTransaction(clientId)).willReturn(List.of(transaction));
+
+		//WHEN
+		List<Transaction> resul = clientUseCase.getAllTransaction(clientId);
+
+		//THAT
+		assertNotNull(resul);
 	}
 
 }
