@@ -1,6 +1,5 @@
 package com.victordw.btg.adapter.driving.http.controller;
 
-import com.victordw.btg.adapter.driving.http.dto.request.FundCancellationRequest;
 import com.victordw.btg.adapter.driving.http.dto.request.FundSubscribedRequest;
 import com.victordw.btg.adapter.driving.http.dto.response.ClientInfoResponse;
 import com.victordw.btg.adapter.driving.http.dto.response.FundSubscribedResponse;
@@ -37,12 +36,12 @@ public class ClientController {
 		return ResponseEntity.ok().build();
 	}
 
-	@DeleteMapping("/{id}/unsubcription")
+	@DeleteMapping("/{id}/unsubcription/{idCancel}")
 	ResponseEntity<Void> cancellationFund(
 			@PathVariable("id") String clientId,
-			@RequestBody FundCancellationRequest request
+			@PathVariable("idCancel") Long fundId
 	) {
-		clientServicePort.cancellationSubscription(clientId, request.fundId());
+		clientServicePort.cancellationSubscription(clientId, fundId);
 		return ResponseEntity.ok().build();
 	}
 
